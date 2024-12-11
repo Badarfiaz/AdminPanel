@@ -1,63 +1,132 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchProductsData } from "../Redux/AdminSlices";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const AdminPage = () => {
-  const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.admin);
+    const [productData, setProductData] = useState({
+        Title: '',
+        Description: '',
+        Price: '',
+        Category: '',
+        img: '',
+        quantity: '',
+        img2: '',
+        img3: '',
+        img4: '',
+    });
 
-  useEffect(() => {
-    dispatch(fetchProductsData());
-  }, [dispatch]);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProductData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:3000/api/addProduct', productData);
+            alert('Product added successfully');
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error adding product:', error);
+            alert('Error adding product');
+        }
+    };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  return (
-    <div className="py-16">
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-          Product Inventory
-        </h2>
-
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 mt-1 xl:grid-cols-4 xl:gap-x-6">
-          {products && products.length > 0 ? (
-            products.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:shadow-lg hover:scale-105 flex flex-col"
-              >
-                <div className="relative w-full overflow-hidden bg-[#F8E8EE] rounded-t-lg">
-                  <img
-                    alt={product.Description || 'Product Image'}
-                    src={product.img || 'https://via.placeholder.com/150'}
-                    className="w-full h-48 object-cover object-center"
-                    style={{ height: '200px' }}
-                  />
+    return (
+        <div className="p-4 max-w-xl mx-auto bg-white shadow-lg rounded-lg">
+            <h2 className="text-2xl font-bold text-center mb-4">Add Product</h2>
+            <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="Title">
+                        Title
+                    </label>
+                    <input
+                        type="text"
+                        name="Title"
+                        id="Title"
+                        value={productData.Title}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                        required
+                    />
                 </div>
-                <div className="p-4 flex flex-col flex-grow items-start justify-between">
-                  <h3 className="text-base font-semibold text-gray-800">
-                    <span className="hover:text-[#F2BED1]">Item: {product.Title}</span>
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Quantity: {product.quantity || 'No quantity available'}
-                  </p>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="Description">
+                        Description
+                    </label>
+                    <textarea
+                        name="Description"
+                        id="Description"
+                        value={productData.Description}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                        required
+                    />
                 </div>
-              </div>
-            ))
-          ) : (
-            <div>No products available.</div>
-          )}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="Price">
+                        Price
+                    </label>
+                    <input
+                        type="number"
+                        name="Price"
+                        id="Price"
+                        value={productData.Price}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                        required
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="Category">
+                        Category
+                    </label>
+                    <input
+                        type="text"
+                        name="Category"
+                        id="Category"
+                        value={productData.Category}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                        required
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="img">
+                        Image URL
+                    </label>
+                    <input
+                        type="text"
+                        name="img"
+                        id="img"
+                        value={productData.img}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="quantity">
+                        Quantity
+                    </label>
+                    <input
+                        type="number"
+                        name="quantity"
+                        id="quantity"
+                        value={productData.quantity}
+                        onChange={handleChange}
+                        className="w-full p-2 mt-1 border border-gray-300 rounded"
+                    />
+                </div>
+                <div className="mb-4">
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-lg">
+                        Add Product
+                    </button>
+                </div>
+            </form>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AdminPage;
-
