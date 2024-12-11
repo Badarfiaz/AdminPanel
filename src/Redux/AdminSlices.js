@@ -20,13 +20,19 @@ export const fetchProductsData = createAsyncThunk(
 );
 export const addProducts = createAsyncThunk(
   "admin/addProducts",
-  
-  async ({ title  }, thunkAPI) => {
+  async ({ title, description, price, category, img, quantity, img2, img3, img4 }, thunkAPI) => {
     try {
-       // Make a POST request to your Express backend
+      // Make a POST request to your Express backend
       const response = await axios.post('http://localhost:3000/api/addProduct', {
         Title: title,
-       
+        Description: description,
+        Price: price,
+        Category: category,
+        img: img,
+        quantity: quantity,
+        img2: img2,
+        img3: img3,
+        img4: img4
       });
 
       console.log("Product added successfully:", response.data); // Log response from the backend
@@ -60,14 +66,16 @@ const AdminSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Handle adding a product states
+      //Push products  
       .addCase(addProducts.pending, (state) => {
         state.status = 'loading';
       })
       .addCase(addProducts.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.products.push(action.payload); // Push the added product to the products array
-      })
+        state.products.push(action.payload);
+
+
+       })
       .addCase(addProducts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
