@@ -43,6 +43,27 @@ export const addProducts = createAsyncThunk(
     }
   }
 );
+
+export const RemoveProducts = createAsyncThunk(
+  "admin/RemoveProducts",
+  async (id, thunkAPI) => {
+    console.log("Received ID for deletion:", id);
+    try {
+      // Send a DELETE request to your Express API
+      const response = await axios.delete(`http://localhost:3000/api/deleteProduct/:id`);
+
+
+      
+      return id; // Return the id of the deleted product
+    } catch (error) {
+      console.error("Failed to remove product:", error.message);
+      return thunkAPI.rejectWithValue(error.response?.data || "Failed to remove product");
+    }
+  }
+)
+
+
+
 const AdminSlice = createSlice({
   name: 'admin',
   initialState: {
@@ -80,9 +101,31 @@ const AdminSlice = createSlice({
         state.status = 'failed';
         state.error = action.error.message;
       })
+    
+      
+  .addCase(RemoveProducts.pending, (state)=>{
+  state.status='Loading';
+ })
+ 
+ .addCase(RemoveProducts.fulfilled, (state, action) => {
+  state.status = 'succeeded';
+  state.products = state.products.filter(
+    (product) => product.id !== parseInt(action.payload)
+  );
+})
+
+ 
+ .addCase(RemoveProducts.rejected, (state, action) => {
+  state.status = 'failed';
+  console.error("Error removing product:", action.error.message);
+});
+
+      
+     ;
 
   },
 });
+export const { setProducts } = AdminSlice.actions;
 
 export default AdminSlice.reducer;
 
