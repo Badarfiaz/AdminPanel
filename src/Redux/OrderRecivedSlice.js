@@ -1,11 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from 'axios'; // Axios is used for making HTTP requests
-
-export const CustomerFetch = createAsyncThunk(
+ 
+export const OrderRecivedFetch = createAsyncThunk(
   "Product/fetchProductsData",
   async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/customer");
+      const response = await fetch("http://localhost:3000/api/OrderRecived");
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
@@ -20,8 +19,10 @@ export const CustomerFetch = createAsyncThunk(
 );
 
 
-const CustomerSlice = createSlice({
-  name: 'Customer',
+
+
+const OrderRecivedSlice = createSlice({
+  name: 'OrderRecived',
   initialState: {
     products: [],
     loading: false,
@@ -30,22 +31,22 @@ const CustomerSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(CustomerFetch.pending, (state) => {
+      .addCase(OrderRecivedFetch.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(CustomerFetch.fulfilled, (state, action) => {
+      .addCase(OrderRecivedFetch.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload; // Directly assign the payload to products
       })
-      .addCase(CustomerFetch.rejected, (state, action) => {
+      .addCase(OrderRecivedFetch.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });
 
   },
 });
-export const { setCustomers } = CustomerSlice.actions;
+export const { setOrderRecived } = OrderRecivedSlice.actions;
 
-export default CustomerSlice.reducer;
+export default OrderRecivedSlice.reducer;
 
