@@ -65,6 +65,9 @@ const Nav = () => {
           <Link onClick={() => setIsSidebarOpen(false)} to={"/order"} className="text-[#F2BED1] hover:text-[#F8E8EE] font-medium transition-colors duration-300">
             Order-recived
           </Link>
+          <Link onClick={() => setIsSidebarOpen(false)} to={"/Complaints"} className="text-[#F2BED1] hover:text-[#F8E8EE] font-medium transition-colors duration-300">
+            Order-Complaints
+          </Link>
         </div>
 
         {/* Call to Action Button */}
@@ -119,7 +122,7 @@ const Nav = () => {
           </motion.div>
           <motion.div variants={itemVariants}>
             <Link onClick={() => setIsSidebarOpen(false)} to={"/checked"} className="text-[#F2BED1] hover:text-[#F8E8EE] font-medium transition-colors duration-300">
-              Order-Completed
+              Order-Co
             </Link>
           </motion.div>
         </motion.div>

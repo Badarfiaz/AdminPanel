@@ -5,7 +5,9 @@ import Nav from "./Components/Nav";
 import DeleteProducts from "./Components/DeleteProducts";
 import ScrollToTop from "./Components/ScrollToTop";
 import OrderRecived from "./Pages/OrderRecived";
+import OrderComplaints from './Pages/OrderComplaints'
 const App = () => {
+
   return (
     <Router>
 <ScrollToTop/>
@@ -17,6 +19,7 @@ const App = () => {
         <Route path="/Productpage" element={<Prodcutspage />} />
         <Route path="/delete-product" element={<DeleteProducts/>} />  
         <Route path="/order" element={< OrderRecived/>} />  
+        <Route path="/Complaints" element={< OrderComplaints/>} />  
         
 
       </Routes>
