@@ -1,107 +1,147 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchProductsData, RemoveProducts } from "../Redux/AdminSlices";
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import LoaderProduct from "../Components/LoaderProduct";
- const Prodcutspage = () => {
-  const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.admin);
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fetchProductsData, RemoveProducts } from '../Redux/AdminSlices'
+import { ProductCard } from '../Components/ProductCard'
+import { Loader2, AlertCircle } from 'lucide-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+const Productspage = () => {
+  const dispatch = useDispatch()
+  const { products, loading, error } = useSelector((state) => state.admin)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [id, setid] = useState(null)
 
   useEffect(() => {
-    dispatch(fetchProductsData());
-  }, [dispatch]);
-  
-  const handleRemoveProduct = async (id) => {
+    dispatch(fetchProductsData())
+  }, [dispatch])
+
+  const handleRemoveProduct = (id) => {
+    setid(id)
+    setIsDeleteModalOpen(true)
+  }
+
+  const confirmDelete = async () => {
     try {
-        const response = await fetch(`http://localhost:3000/api/deleteProduct/${id}`, {
-            method: 'DELETE',
-        });
+      const response = await fetch(`http://localhost:3000/api/deleteProduct/${id}`, {
+        method: 'DELETE',
+      })
 
-        if (!response.ok) {
-            console.error('Failed to delete product:', await response.text());
-            return;
-        }
+      if (!response.ok) {
+        throw new Error('Failed to delete product')
+      }
+      toast.success('Product deleted successfully')
+      window.location.reload();
 
-        console.log('Product deleted successfully');
     } catch (error) {
-        console.error('Error:', error);
+      console.error('Error:', error)
+      toast.error('Failed to delete product')
+    } finally {
+      setIsDeleteModalOpen(false)
+      setid(null)
     }
-};
+  }
 
   const totalCost = Array.isArray(products)
     ? products.reduce((acc, product) => acc + (product.Price || 0) * (product.quantity || 1), 0)
-    : 0;
-
-  if (loading) {
-    return (
-      <div>
-        <LoaderProduct />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-16 text-red-500">
-        Error: {error}
-      </div>
-    );
-  }
+    : 0
 
   return (
-    <div className="py-16">
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="max-w-7xl mx-auto">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-4xl font-bold text-center text-gray-900 mb-8"
+        >
           Product Inventory
-        </h2>
-        <div className="mt-8 flex justify-between items-center">
-          <h3 className="text-lg font-bold">Total Cost</h3>
-          <p className="text-xl font-semibold text-[#8d67c2]">Rs:{totalCost}</p>
-        </div>
+        </motion.h1>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 mt-1 xl:grid-cols-4 xl:gap-x-6">
-          {Array.isArray(products) && products.length > 0 ? (
-            products.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:shadow-lg hover:scale-105 flex flex-col"
-              >
-                <div className="relative w-full overflow-hidden bg-[#F8E8EE] rounded-t-lg">
-                  <img
-                    alt={product.Description || "Product Image"}
-                    src={product.img || "https://via.placeholder.com/150"}
-                    className="w-full h-48 object-cover object-center"
-                    style={{ height: "200px" }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-white rounded-lg shadow-lg p-6 mb-8"
+        >
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Inventory Value</h2>
+            <p className="text-3xl font-bold text-indigo-600">₹{totalCost.toFixed(2)}</p>
+          </div>
+        </motion.div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="animate-spin text-indigo-600" size={48} />
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 text-red-500 flex items-center justify-center">
+            <AlertCircle className="mr-2" />
+            Error: {error}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
+            <AnimatePresence>
+              {Array.isArray(products) && products.length > 0 ? (
+                products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onDelete={() => handleRemoveProduct(product.id)} // Passing id for delete
                   />
-                </div>
-                <div className="p-4 flex flex-col flex-grow items-start justify-between">
-                  <h3 className="text-base font-semibold text-gray-800">
-                    <span className="hover:text-[#F2BED1]">Item: {product.Title}</span>
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Quantity: {product.quantity || "No quantity available"}
-                  </p>
-                </div>
-                <p className="mt-2 text-m text-gray-600">
-                  Subtotal: Rs {product.Price * (product.quantity || 1)}
-                </p>
-                <button
-                  onClick={() => handleRemoveProduct(product.id)}
-                  aria-label={`Remove ${product.Title}`}
-                  className="flex items-center bg-red-500 text-white font-medium py-2 px-1.5 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-300 ease-in-out text-sm sm:text-base"
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="col-span-full text-center text-gray-500 py-12"
                 >
-                  Delete
-                  <DeleteOutlineOutlinedIcon fontSize="small" />
-                </button>
-              </div>
-            ))
-          ) : (
-            <div>No products available.</div>
-          )}
-        </div>
+                  No products available.
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
-    </div>
-  );
-};
 
-export default Prodcutspage;
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white rounded-lg p-6 max-w-sm w-full"
+          >
+            <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+            <p className="mb-6">Are you sure you want to delete this product?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Productspage

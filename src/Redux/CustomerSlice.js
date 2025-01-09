@@ -2,16 +2,16 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from 'axios'; // Axios is used for making HTTP requests
 
 export const CustomerFetch = createAsyncThunk(
-  "Product/fetchProductsData",
+  "Customer/fetchProductsData",
   async () => {
     try {
       const response = await fetch("http://localhost:3000/api/customer");
       if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        throw new Error("Failed to fetch Customer");
       }
 
       const data = await response.json();
-      console.log("Fetched data:", data);
+      console.log("Customer data:", data);
       return data; // Return the entire data object
     } catch (error) {
       throw new Error(error.message);
@@ -21,9 +21,9 @@ export const CustomerFetch = createAsyncThunk(
 
 
 const CustomerSlice = createSlice({
-  name: 'Customer',
+  name: 'Customers',
   initialState: {
-    products: [],
+    Customer: [],
     loading: false,
     error: null,
   },
@@ -36,7 +36,7 @@ const CustomerSlice = createSlice({
       })
       .addCase(CustomerFetch.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload; // Directly assign the payload to products
+        state.Customer = action.payload; // Directly assign the payload to products
       })
       .addCase(CustomerFetch.rejected, (state, action) => {
         state.loading = false;

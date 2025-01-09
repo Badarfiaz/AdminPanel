@@ -8,7 +8,7 @@ const store = configureStore({
   reducer: {
     admin: AdminSlices, // Ensure the 'admin' slice is correctly named
     Orders:OrderSlice,
-    Customer:CustomerSlice,
+    Customers:CustomerSlice,
     OrderRecived:OrderRecivedSlice,
     Complains:ComplaintsSlice,
   },

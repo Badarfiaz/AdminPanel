@@ -1,7 +1,37 @@
+'use client'
+
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ComplaintsFetch } from "../Redux/ComplaintsSlice";
+import { AlertCircle, CheckCircle, Clock, Package, User, Mail, Phone, DollarSign, Hash } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardMedia,
+  Typography,
+  Chip,
+  Box,
+  Container,
+  Grid,
+} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+// Create a custom theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#4a90e2",
+    },
+    secondary: {
+      main: "#f50057",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+  },
+});
 
 function OrderComplaints() {
   const dispatch = useDispatch();
@@ -11,47 +41,151 @@ function OrderComplaints() {
     dispatch(ComplaintsFetch());
   }, [dispatch]);
 
-  if (loading) return <div className="text-center p-4">Loading...</div>;
-  if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "resolved":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-red-100 text-red-800";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status.toLowerCase()) {
+      case "resolved":
+        return <CheckCircle className="text-green-500" />;
+      case "pending":
+        return <Clock className="text-yellow-500" />;
+      default:
+        return <AlertCircle className="text-red-500" />;
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-100 to-purple-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-r from-red-100 to-pink-100">
+        <Typography variant="h5" className="text-red-500">
+          Error: {error}
+        </Typography>
+      </div>
+    );
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Order Complaints</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.isArray(Complaints) && Complaints.length > 0 ? (
-          Complaints.map((complaint) => (
-            <motion.div
-              key={complaint["Complaint ID"]}
-              className="bg-white shadow-lg rounded-lg p-6 space-y-4"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <h2 className="text-xl font-semibold mb-2">{complaint["Product Title"]}</h2>
-              <img
-                src={complaint["Product Image"]}
-                alt={complaint["Product Title"]}
-                className="w-full h-48 object-cover rounded-md mb-4"
-              />
-              <div className="space-y-2">
-                <p><strong>Complaint ID:</strong> {complaint["Complaint ID"]}</p>
-                <p><strong>Description:</strong> {complaint["Complaint Description"]}</p>
-                <p><strong>Date:</strong> {new Date(complaint["Complaint Date"]).toLocaleDateString()}</p>
-                <p><strong>Status:</strong> {complaint["Resolution Status"]}</p>
-                <p><strong>Order ID:</strong> {complaint["Order ID"]}</p>
-                <p><strong>Customer Name:</strong> {complaint["Customer Name"]}</p>
-                <p><strong>Email:</strong> {complaint["Customer Email"]}</p>
-                <p><strong>Phone Number:</strong> {complaint["Customer Phone Number"]}</p>
-                <p><strong>Quantity:</strong> {complaint["Order Quantity"]}</p>
-                <p><strong>Total Amount:</strong> ${complaint["Order Total Amount"]}</p>
-              </div>
-            </motion.div>
-          ))
-        ) : (
-          <div className="text-center text-gray-600">No complaints found.</div>
-        )}
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Box className="min-h-screen bg-gradient-to-br from-red-300 via-blue-50 to-red-200">
+        <Container maxWidth="lg" className="py-12">
+          <Typography
+            variant="h2"
+            className="text-center mb-12 font-Extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600"
+          >
+            Order Complaints
+          </Typography>
+          <Box className="overflow-y-auto max-h-[calc(100vh-12rem)]">
+            <AnimatePresence>
+              <Grid container spacing={4}>
+                {Array.isArray(Complaints) && Complaints.length > 0 ? (
+                  Complaints.map((complaint) => (
+                    <Grid item xs={12} sm={6} md={4} key={complaint["Complaint ID"]}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Card className="hover:shadow-xl transition-shadow duration-300 rounded-lg overflow-hidden">
+                          <CardHeader
+                            title={
+                              <Typography variant="h6" noWrap className="font-semibold">
+                                {complaint["Product Title"]}
+                              </Typography>
+                            }
+                            action={
+                              <Chip
+                                icon={getStatusIcon(complaint["Resolution Status"])}
+                                label={complaint["Resolution Status"]}
+                                className={`${getStatusColor(
+                                  complaint["Resolution Status"]
+                                )} font-medium`}
+                              />
+                            }
+                            className="bg-gradient-to-r from-gray-50 to-gray-100"
+                          />
+                          <CardMedia
+                            component="img"
+                            height="180"
+                            image={complaint["Product Image"]}
+                            alt={complaint["Product Title"]}
+                            className="h-48 object-cover"
+                          />
+                          <CardContent className="space-y-3">
+                            <Typography variant="body2" color="text.secondary" className="flex items-center">
+                              <Hash className="w-4 h-4 mr-2" />
+                              {complaint["Complaint ID"]}
+                            </Typography>
+                            <Typography variant="body2" className="flex items-center">
+                              <AlertCircle className="w-4 h-4 mr-2 text-red-500" />
+                              {complaint["Complaint Description"]}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" className="flex items-center">
+                              <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                              {new Date(complaint["Complaint Date"]).toLocaleDateString()}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" className="flex items-center">
+                              <Package className="w-4 h-4 mr-2 text-purple-500" />
+                              {complaint["Order ID"]}
+                            </Typography>
+                            <Typography variant="body2" className="flex items-center">
+                              <User className="w-4 h-4 mr-2 text-green-500" />
+                              {complaint["Customer Name"]}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" className="flex items-center">
+                              <Mail className="w-4 h-4 mr-2 text-blue-500" />
+                              {complaint["Customer Email"]}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" className="flex items-center">
+                              <Phone className="w-4 h-4 mr-2 text-green-500" />
+                              {complaint["Customer Phone Number"]}
+                            </Typography>
+                            <Typography variant="body2" className="flex items-center">
+                              <Hash className="w-4 h-4 mr-2 text-purple-500" />
+                              Quantity: {complaint["Order Quantity"]}
+                            </Typography>
+                            <Typography variant="body2" className="flex items-center font-semibold">
+                              <DollarSign className="w-4 h-4 mr-2 text-green-500" />
+                              Total: ${complaint["Order Total Amount"]}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Grid>
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center text-gray-600"
+                    >
+                      <Typography variant="h5">No complaints found.</Typography>
+                    </motion.div>
+                  </Grid>
+                )}
+              </Grid>
+            </AnimatePresence>
+          </Box>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }
 
 export default OrderComplaints;
+
